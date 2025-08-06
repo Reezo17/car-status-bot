@@ -12,9 +12,8 @@ app = Flask(__name__)
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json(force=True)
-
-    print("📩 Входящий апдейт:")
-    print(data)
+    
+    print("📩 Входящий апдейт:", data)  # Печать входящего сообщения
 
     message = data.get("message") or data.get("edited_message")
     if not message:
@@ -25,18 +24,17 @@ def webhook():
 
     if text == "/start":
         reply = (
-            "👋 Здравствуйте! Используйте /register, чтобы узнать свой chat_id и зарегистрироваться. "
+            "📌 Здравствуйте! Используйте /register, чтобы узнать свой chat_id и зарегистрироваться.\n"
             "Или /status, если уже зарегистрированы."
         )
     elif text == "/register":
-        reply = f"🆔 Ваш chat_id: `{chat_id}`\n\nСообщите его регистратору."
+        reply = f"👤 Ваш chat_id: `{chat_id}`\n\nСообщите его регистратору."
     elif text == "/status":
         reply = get_car_status(chat_id, SPREADSHEET_ID)
     else:
-        reply = "❌ Неизвестная команда. Используйте /start, /register или /status."
+        reply = "⚠️ Неизвестная команда. Используйте /start, /register или /status."
 
-    print("📤 Ответ бота:")
-    print(reply)
+    print("📤 Ответ бота:", reply)  # Печать текста, который бот собирается отправить
 
     response = requests.post(
         f"https://api.telegram.org/bot{TOKEN}/sendMessage",
@@ -47,8 +45,7 @@ def webhook():
         }
     )
 
-    print("📦 Результат запроса к Telegram API:")
-    print(response.status_code, response.text)
+    print(f"📦 Результат запроса к Telegram API: {response.status_code}", response.text)
 
     return "ok"
 
