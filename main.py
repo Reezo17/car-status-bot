@@ -1,5 +1,4 @@
 import os
-import sys
 import requests
 from flask import Flask, request
 from utils import get_car_status
@@ -7,6 +6,9 @@ from utils import get_car_status
 TOKEN = os.environ["BOT_TOKEN"]
 SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 ADMIN_CHAT_IDS = os.environ["ADMIN_CHAT_IDS"].split(",")
+
+# Указываем путь к json-файлу с ключом сервисного аккаунта
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "service_account.json"
 
 app = Flask(__name__)
 
@@ -51,7 +53,7 @@ def webhook():
                 "parse_mode": "Markdown"
             }
         )
-        print(f"📦 Результат запроса к Telegram API: {response.status_code}, {response.text}", flush=True)
+        print(f"✅ Результат запроса к Telegram API: {response.status_code}, {response.text}", flush=True)
     except Exception as e:
         print(f"❌ Ошибка при отправке в Telegram: {e}", flush=True)
 
