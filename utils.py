@@ -10,10 +10,10 @@ def get_car_status(chat_id, spreadsheet_id):
         data = sheet.get_all_values()
 
         for i in range(len(data)):
-            if data[i][6] == chat_id:
+            if str(data[i][6]).strip() == str(chat_id).strip():  # chat_id — это колонка G
                 car_model = data[i][1]
                 plate = data[i][2]
-                sheet_name = f"{car_model} {plate}".strip()
+                sheet_name = data[i][4].strip()
                 car_sheet = client.open_by_key(spreadsheet_id).worksheet(sheet_name)
                 car_data = car_sheet.get_all_values()
 
@@ -22,19 +22,20 @@ def get_car_status(chat_id, spreadsheet_id):
                     last_row -= 1
 
                 if last_row < 0:
-                    return f"❗ Нет данных по пробегу для {sheet_name}"
+                    return f"⚠️ Нет данных по пробегу для {sheet_name}"
 
                 row = car_data[last_row]
-                return f"""📋 Отчет по авто *{sheet_name}*\n
+                return f"""🚘 Отчет по авто *{sheet_name}*\n
 📅 Дата: {row[0]}
-🚗 Пробег: {row[1]} км
-🔋 Состояние: {row[2]}
+📍 Пробег: {row[1]} км
+🟢 Состояние: {row[2]}
 📌 Рекомендации: {row[3]}
 🛢 Замена масла: {row[4]} км
-💧 Замена жидкости: {row[5]} км
-🧰 Техосмотр: {row[6]}"""
+🧪 Замена жидкости: {row[5]} км
+🧰 Техосмотр: {row[6]} км
+"""
 
         return "⚠️ Ваш chat_id не найден в таблице 'Автопарк'. Обратитесь к администратору."
-    
+
     except Exception as e:
         return f"❌ Ошибка при получении данных: {str(e)}"
