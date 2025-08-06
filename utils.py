@@ -9,7 +9,7 @@ def get_car_status(chat_id, spreadsheet_id):
         sheet = client.open_by_key(spreadsheet_id).worksheet("Автопарк")
         data = sheet.get_all_values()
 
-        for i in range(1, len(data)):
+        for i in range(len(data)):
             if data[i][6] == chat_id:
                 car_model = data[i][1]
                 plate = data[i][2]
@@ -18,23 +18,23 @@ def get_car_status(chat_id, spreadsheet_id):
                 car_data = car_sheet.get_all_values()
 
                 last_row = len(car_data) - 1
-                while last_row > 0 and not car_data[last_row][1]:
+                while last_row >= 0 and not car_data[last_row][1]:
                     last_row -= 1
 
-                if last_row <= 0:
-                    return f"🚫 Нет данных по пробегу для {sheet_name}"
+                if last_row < 0:
+                    return f"❗ Нет данных по пробегу для {sheet_name}"
 
                 row = car_data[last_row]
-                return f"""📋 *Отчет по авто {sheet_name}*
-
+                return f"""📋 Отчет по авто *{sheet_name}*\n
 📅 Дата: {row[0]}
-📍 Пробег: {row[1]} км
-🔧 Состояние: {row[2]}
-🛠 Рекомендации: {row[3]}
+🚗 Пробег: {row[1]} км
+🔋 Состояние: {row[2]}
+📌 Рекомендации: {row[3]}
 🛢 Замена масла: {row[4]} км
-💧 Замена жидкостей: {row[5]} км
-🧾 Техосмотр: {row[6]}"""
+💧 Замена жидкости: {row[5]} км
+🧰 Техосмотр: {row[6]}"""
 
-        return "🚫 Ваш chat_id не найден в таблице 'Автопарк'. Обратитесь к администратору."
+        return "⚠️ Ваш chat_id не найден в таблице 'Автопарк'. Обратитесь к администратору."
+    
     except Exception as e:
         return f"❌ Ошибка при получении данных: {str(e)}"
