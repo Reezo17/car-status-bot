@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 from flask import Flask, request
 from utils import get_car_status
@@ -12,16 +13,16 @@ app = Flask(__name__)
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json(force=True)
-    print("👉 Входящий запрос от Telegram:", data)
+    print("👉 Входящий запрос от Telegram:", data, flush=True)
 
     message = data.get("message") or data.get("edited_message")
     if not message:
-        print("⚠️ Нет message в запросе")
+        print("⚠️ Нет message в запросе", flush=True)
         return "ok"
 
     chat_id = str(message["chat"]["id"])
     text = message.get("text", "").strip()
-    print(f"📩 Сообщение от {chat_id}: {text}")
+    print(f"📩 Сообщение от {chat_id}: {text}", flush=True)
 
     if text == "/start":
         reply = (
@@ -35,11 +36,11 @@ def webhook():
             reply = get_car_status(chat_id, SPREADSHEET_ID)
         except Exception as e:
             reply = f"❌ Ошибка при получении статуса: {e}"
-            print("❌ Ошибка в get_car_status:", e)
+            print("❌ Ошибка в get_car_status:", e, flush=True)
     else:
         reply = "❗ Неизвестная команда. Используйте /start, /register или /status."
 
-    print("📤 Ответ бота:", reply)
+    print("📤 Ответ бота:", reply, flush=True)
 
     try:
         response = requests.post(
@@ -50,11 +51,9 @@ def webhook():
                 "parse_mode": "Markdown"
             }
         )
-        print("📦 Результат запроса к Telegram API:")
-        print("🔢 Статус-код:", response.status_code)
-        print("📄 Ответ:", response.text)
+        print(f"📦 Результат запроса к Telegram API: {response.status_code}, {response.text}", flush=True)
     except Exception as e:
-        print(f"❌ Ошибка при отправке в Telegram: {e}")
+        print(f"❌ Ошибка при отправке в Telegram: {e}", flush=True)
 
     return "ok"
 
