@@ -11,24 +11,24 @@ app = Flask(__name__)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json(force=True)
+    data = request.get_json(force=True)  # DEBUG
     print("📩 Входящий апдейт:", data)  # DEBUG
 
     message = data.get("message") or data.get("edited_message")
     if not message:
-        return "No message"
+        return "no message"
 
     chat_id = str(message["chat"]["id"])
     text = message.get("text", "").strip()
 
     if text == "/start":
-        reply = "Нажмите /register, чтобы узнать свой chat_id и зарегистрироваться. Или /status, если уже зарегистрированы."
+        reply = "👋 Здравствуйте! Напишите /register, чтобы узнать свой chat_id и зарегистрироваться. Или /status, если уже зарегистрированы."
     elif text == "/register":
         reply = f"Ваш chat_id: `{chat_id}`\n\nСообщите его регистратору."
     elif text == "/status":
         reply = get_car_status(chat_id, SPREADSHEET_ID)
     else:
-        reply = "Неизвестная команда. Используйте /start, /register или /status."
+        reply = "❓ Неизвестная команда. Используйте /start, /register или /status."
 
     print("📤 Ответ бота:", reply)  # DEBUG
 
