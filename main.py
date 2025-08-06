@@ -11,8 +11,8 @@ app = Flask(__name__)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json()
-    print("✅ Получены данные от Telegram:", data)  # Лог входящего запроса
+    data = request.get_json(force=True)
+    print("📩 Входящий апдейт:", data)  # Лог входящего JSON
 
     if not data:
         return "no data"
@@ -26,27 +26,26 @@ def webhook():
 
     # Обработка команд
     if text == "/start":
-        reply = "👋 Привет! Напиши /register, чтобы узнать свой chat_id и зарегистрироваться. Или /status, если уже зарегистрирован."
+        reply = "Привет! Напиши /register, чтобы узнать свой chat_id и зарегистрироваться. Или /status, если уже зарегистрирован."
     elif text == "/register":
-        reply = f"🆔 Ваш chat_id: `{chat_id}`\n\nСкопируйте и передайте администратору."
+        reply = f"Ваш chat_id: `{chat_id}`\n\nСкопируйте и передайте администратору."
     elif text == "/status":
         reply = get_car_status(chat_id, SPREADSHEET_ID)
     else:
-        reply = "❓ Неизвестная команда. Используйте /start, /register или /status."
+        reply = "Неизвестная команда. Используйте /start, /register или /status."
 
-    print("📤 Отправка сообщения:", reply)  # Лог ответа
+    print("📤 Ответ бота:", reply)
 
     # Отправка ответа пользователю
-    resp = requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", json={
+    response = requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", json={
         "chat_id": chat_id,
         "text": reply,
         "parse_mode": "Markdown"
     })
-
-    print("📬 Ответ Telegram API:", resp.status_code, resp.text)  # Лог результата
+    print("📦 Результат запроса к Telegram API:", response.status_code, response.text)
 
     return "ok"
-
+    
 # Запуск сервера
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
