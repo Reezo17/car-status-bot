@@ -50,7 +50,9 @@ def webhook():
                 "parse_mode": "Markdown"
             }
         )
-        print(f"✅ Запрос в Telegram: {response.status_code}, {response.text}")
+        print("📦 Результат запроса к Telegram API:")
+        print("🔢 Статус-код:", response.status_code)
+        print("📄 Ответ:", response.text)
     except Exception as e:
         print(f"❌ Ошибка при отправке в Telegram: {e}")
 
