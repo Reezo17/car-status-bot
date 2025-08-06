@@ -12,40 +12,47 @@ app = Flask(__name__)
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json(force=True)
-    
-    print("📩 Входящий апдейт:", data)  # Печать входящего сообщения
+    print("👉 Входящий запрос от Telegram:", data)
 
     message = data.get("message") or data.get("edited_message")
     if not message:
+        print("⚠️ Нет message в запросе")
         return "ok"
 
     chat_id = str(message["chat"]["id"])
     text = message.get("text", "").strip()
+    print(f"📩 Сообщение от {chat_id}: {text}")
 
     if text == "/start":
         reply = (
-            "📌 Здравствуйте! Используйте /register, чтобы узнать свой chat_id и зарегистрироваться.\n"
+            "👋 Здравствуйте! Используйте /register, чтобы узнать свой chat_id и зарегистрироваться.\n"
             "Или /status, если уже зарегистрированы."
         )
     elif text == "/register":
-        reply = f"👤 Ваш chat_id: `{chat_id}`\n\nСообщите его регистратору."
+        reply = f"🆔 Ваш chat_id: `{chat_id}`\n\nСообщите его регистратору."
     elif text == "/status":
-        reply = get_car_status(chat_id, SPREADSHEET_ID)
+        try:
+            reply = get_car_status(chat_id, SPREADSHEET_ID)
+        except Exception as e:
+            reply = f"❌ Ошибка при получении статуса: {e}"
+            print("❌ Ошибка в get_car_status:", e)
     else:
-        reply = "⚠️ Неизвестная команда. Используйте /start, /register или /status."
+        reply = "❗ Неизвестная команда. Используйте /start, /register или /status."
 
-    print("📤 Ответ бота:", reply)  # Печать текста, который бот собирается отправить
+    print("📤 Ответ бота:", reply)
 
-    response = requests.post(
-        f"https://api.telegram.org/bot{TOKEN}/sendMessage",
-        json={
-            "chat_id": chat_id,
-            "text": reply,
-            "parse_mode": "Markdown"
-        }
-    )
-
-    print(f"📦 Результат запроса к Telegram API: {response.status_code}", response.text)
+    try:
+        response = requests.post(
+            f"https://api.telegram.org/bot{TOKEN}/sendMessage",
+            json={
+                "chat_id": chat_id,
+                "text": reply,
+                "parse_mode": "Markdown"
+            }
+        )
+        print(f"✅ Запрос в Telegram: {response.status_code}, {response.text}")
+    except Exception as e:
+        print(f"❌ Ошибка при отправке в Telegram: {e}")
 
     return "ok"
 
