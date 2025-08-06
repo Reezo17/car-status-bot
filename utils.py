@@ -1,41 +1,21 @@
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
-def get_car_status(chat_id, spreadsheet_id):
+def get_car_status(chat_id, spreadsheet_id, creds):
     try:
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('creds.json', scope)
-        client = gspread.authorize(creds)
-        sheet = client.open_by_key(spreadsheet_id).worksheet("Автопарк")
-        data = sheet.get_all_values()
+        gc = gspread.authorize(creds)
+        sh = gc.open_by_key(spreadsheet_id)
+        worksheet = sh.sheet1  # или укажи по имени, например: sh.worksheet("Sheet1")
+        data = worksheet.get_all_records()
 
-        for i in range(len(data)):
-            if str(data[i][6]).strip() == str(chat_id).strip():  # chat_id — это колонка G
-                car_model = data[i][1]
-                plate = data[i][2]
-                sheet_name = data[i][4].strip()
-                car_sheet = client.open_by_key(spreadsheet_id).worksheet(sheet_name)
-                car_data = car_sheet.get_all_values()
+        for row in data:
+            if str(row.get("chat_id")) == str(chat_id):
+                car = row.get("car", "🚘 Авто")
+                status = row.get("status", "❓ Статус не указан")
+                comment = row.get("comment", "")
+                return f"🚗 *{car}*\n📋 Статус: *{status}*\n📝 {comment}"
 
-                last_row = len(car_data) - 1
-                while last_row >= 0 and not car_data[last_row][1]:
-                    last_row -= 1
-
-                if last_row < 0:
-                    return f"⚠️ Нет данных по пробегу для {sheet_name}"
-
-                row = car_data[last_row]
-                return f"""🚘 Отчет по авто *{sheet_name}*\n
-📅 Дата: {row[0]}
-📍 Пробег: {row[1]} км
-🟢 Состояние: {row[2]}
-📌 Рекомендации: {row[3]}
-🛢 Замена масла: {row[4]} км
-🧪 Замена жидкости: {row[5]} км
-🧰 Техосмотр: {row[6]} км
-"""
-
-        return "⚠️ Ваш chat_id не найден в таблице 'Автопарк'. Обратитесь к администратору."
+        return "⚠️ Вы не зарегистрированы. Используйте /register и сообщите свой chat_id администратору."
 
     except Exception as e:
-        return f"❌ Ошибка при получении данных: {str(e)}"
+        print("❌ Ошибка в utils.get_car_status:", e)
+        raise e
