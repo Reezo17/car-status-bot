@@ -9,13 +9,13 @@ ADMIN_CHAT_IDS = os.getenv("ADMIN_CHAT_IDS", "").split(",")
 
 app = Flask(__name__)
 
-@app.route('/webhook', methods=['POST'])
+@app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
     if not data:
         return "no data"
 
-    message = data.get('message') or data.get('edited_message')
+    message = data.get("message") or data.get("edited_message")
     if not message:
         return "no message"
 
@@ -25,7 +25,7 @@ def webhook():
     if text == '/start':
         reply = "👋 Привет! Напиши /register, чтобы узнать свой chat_id и зарегистрироваться. Или /status, если уже зарегистрирован."
     elif text == '/register':
-        reply = f"✅ Ваш chat_id: `{chat_id}`\n\nСкопируйте и передайте администратору."
+        reply = f"🆔 Ваш chat_id: `{chat_id}`\n\nСкопируйте и передайте администратору."
     elif text == '/status':
         reply = get_car_status(chat_id, SPREADSHEET_ID)
     else:
@@ -36,10 +36,9 @@ def webhook():
         "text": reply,
         "parse_mode": "Markdown"
     })
-return "ok"
+
+    return "ok"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-    
